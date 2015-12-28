@@ -1,0 +1,200 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="css/project.css" rel="stylesheet">
+    <script src="lib/underscore-min.js"></script>
+    <script src="lib/jquery-1.7.2.min.js"></script>
+    <script src="lib/jquery-validation-1.9.0/jquery.validate.js"></script>
+    <script src="lib/jquery-validation-1.9.0/localization/messages_es.js"></script>
+    <script src="lib/frames.js"></script>
+    <script src="lib/sample-frames.js"></script>
+    <script src="lib/jquery.blockUI.js"></script>
+    
+    <title>Diagn&oacute;stico del proyecto</title>
+    <script>
+        $(function () {
+            $("#projectForm").validate({
+                rules:{
+                    totalBudget: {required: true, digits: true},
+                    executedBudget:{required: true, digits: true},
+                    commitedFunctionality:{required: true, digits: true},
+                    deliveredFunctionality:{required: true, digits: true},
+                    estimatedTime:{required: true},
+                    elapsedTime:{required: true},
+                    estimatedEffort:{required: true, digits: true},
+                    investedEffort:{required: true, digits: true}
+                }
+            });
+
+            $("#reset").click(function () {
+                $("#projectForm").validate().resetForm();
+                $("#projectForm input").each(function () {
+                    $(this).val("");
+                });
+            });
+
+            $("#process").click(function () {
+                if ($("#projectForm").valid()) {
+                    processProject();
+                }
+            });
+        });
+
+
+        function processProject() {
+            var project = new Project({
+                executedBudget: parseInt($('#executedBudget').val()),
+                totalBudget: parseInt($('#totalBudget').val()),
+                deliveredFunctionality: parseInt($('#deliveredFunctionality').val()),
+                commitedFunctionality: parseInt($('#commitedFunctionality').val()),
+                elapsedTime: parseInt($('#elapsedTime').val()),
+                estimatedTime: parseInt($('#estimatedTime').val()),
+                investedEffort: parseInt($('#investedEffort').val()),
+                estimatedEffort: parseInt($('#estimatedEffort').val()),
+                projectType: $('#projectType').val()
+            });
+
+            matches = evaluateFrames(simpleFrames, compositeFrames, project);
+
+            var $container = $("<h3><div class='title'>Coinciden los marcos</div></h3>");
+
+            if (matches.compositeFrames.length > 0) {
+                _.forEach(matches.compositeFrames, function(frame) {
+                    $container.append("<div class='frame'>" + frame.name + "&nbsp;<img src='resources/icon_lupa.gif' alt='Ver sugerencias' title='Ver sugerencias' class='sugerencias'/></div>");
+                    $container.append("<div class='sugerenciasContent'><b>Sugerencias del experto:</b><br />" +  frame.suggestedCorrection + "</div>");
+                });
+            } else if (matches.simpleFrames.length > 0) {
+                _.forEach(matches.simpleFrames, function(frame) {
+                    $container.append("<div class='frame " + frame.severity + "'>" + frame.name + "&nbsp;<img src='resources/icon_lupa.gif' alt='Ver sugerencias' title='Ver sugerencias' class='sugerencias'/></div>")
+                    $container.append("<div class='sugerenciasContent'><b>Sugerencias del experto:</b><br />" +  frame.suggestedCorrection + "</div>");
+                });
+            } else {
+                $container = $("<h3><div class='frame severidad-ok title'>No coincide ningun marco conocido</div></h3>");
+            }
+
+            $.blockUI({
+                message: $container.html(),
+                css: {padding: '10px'}
+            });
+            $('.blockOverlay').attr('title','Click para retornar').click($.unblockUI);
+
+            $(".sugerencias").click(function() {
+                $(this).parent().next().toggle('700');
+            });
+        }
+    </script>
+    <style>
+        .side-by-side {
+            float: left;
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Ingrese los datos de su proyecto</h2>
+<form id="projectForm" class="form-horizontal" method="get" action="">
+    <fieldset>
+        <div class="control-group">
+            <label class="control-label" for="projectType">Tipo de proyecto</label>
+
+            <div class="controls">
+                <select id="projectType">
+                    <option value="fp">Fixed Price</option>
+                    <option value="tm">Time &amp; Materials</option>
+                    <option value="mp">Manpower</option>
+                    <option value="cpff">CPFF</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="totalBudget">Presupuesto</label>
+
+            <div class="controls">
+                <div class="input-prepend">
+                    <span class="add-on">$</span><input class="input-xlarge" name="totalBudget" id="totalBudget" size="16" type="text">
+
+                    <p class="help-block">Presupuesto estimado del proyecto</p>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="executedBudget">Presupuesto real ejecutado</label>
+
+            <div class="controls">
+                <div class="input-prepend">
+                    <span class="add-on">$</span><input class="input-xlarge" id="executedBudget" name="executedBudget" size="16" type="text">
+
+                    <p class="help-block">Presupuesto real ejecutado del proyecto</p>
+                </div>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="commitedFunctionality">Funcionalidad comprometida</label>
+
+            <div class="controls">
+                <input class="input-xlarge" id="commitedFunctionality" name="commitedFunctionality" size="16" type="text">
+
+                <p class="help-block">Asigne un puntaje a la funcionalidad con la que se comprometi&oacute;</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="deliveredFunctionality">Funcionalidad entregada</label>
+
+            <div class="controls">
+                <input class="input-xlarge" id="deliveredFunctionality" name="deliveredFunctionality" size="16" type="text">
+
+                <p class="help-block">Teniendo en cuenta el puntaje anterior, asigne un puntaje a la funcionalidad
+                    entregada</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="estimatedTime">Tiempo estimado</label>
+
+            <div class="controls">
+                <input class="input-xlarge" id="estimatedTime" name="estimatedTime" size="16" type="text">
+
+                <p class="help-block">Tiempo estimado del proyecto</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="elapsedTime">Tiempo transcurrido</label>
+
+            <div class="controls">
+                <input class="input-xlarge " id="elapsedTime" name="elapsedTime" size="16" type="text">
+
+                <p class="help-block">Tiempo transcurrido del proyecto</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="estimatedEffort">Esfuerzo estimado</label>
+
+            <div class="controls">
+                <input class="input-xlarge " id="estimatedEffort" name="estimatedEffort" size="16" type="text">
+
+                <p class="help-block">Cantidad de horas hombre estimadas (dependiendo cantidad de recursos, si son part
+                    o full time, etc)</p>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="investedEffort">Esfuerzo invertido</label>
+
+            <div class="controls">
+                <input class="input-xlarge " id="investedEffort" name="investedEffort" size="16" type="text">
+
+                <p class="help-block">Cantidad de horas hombre invertidas (dependiendo cantidad de recursos, si son part
+                    o full time, etc)</p>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="button" id="reset" class="btn-large btn-warning">Reset</button>
+            &nbsp;&nbsp;
+            <button type="button" id="process" class="btn-primary btn-large">Procesar proyecto!</button>
+        </div>
+    </fieldset>
+</form>
+</div>
+</body>
+</html>

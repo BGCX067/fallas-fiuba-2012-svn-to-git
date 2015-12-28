@@ -1,0 +1,65 @@
+h1, h2 {
+  margin-bottom: 25px;
+}
+
+.control-label {
+  font-weight: bold;
+}
+
+
+select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
+  height: 28px;
+}
+
+.error {
+  color: red;
+}
+
+.frame {
+    height: 40px;
+    text-align: left;
+}
+
+.frame.severidad-grave:before {
+    content: url(../resources/grave.png);
+    display: inline-block;
+    height: 18px;
+    padding: 2px;
+}
+
+.frame.severidad-media:before {
+    content: url(../resources/media.png);
+    display: inline-block;
+    height: 18px;
+    padding: 2px;
+}
+
+.frame.severidad-ok:before {
+    content: url(../resources/ok.png);
+    display: inline-block;
+    height: 18px;
+    padding: 4px;
+}
+
+
+div.title {
+    font-weight: bold;
+    text-align: left;
+    margin: 10px 0px;
+    font-size: 12pt;
+}
+
+.sugerencias {
+    font-size: 7pt;
+    cursor: pointer;
+    border: 0;
+    width: 14px;
+}
+
+.sugerenciasContent {
+    display: none;
+    text-align: left;
+    font-style: italic;
+    margin: 5px 2px;
+    font-size: 8pt;
+}
